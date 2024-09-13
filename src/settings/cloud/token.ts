@@ -22,7 +22,7 @@ export async function deleteToken() {
 let serverListening = false;
 async function getTokenFromServer(): Promise<string> {
 	serverListening = true;
-	await shell.openExternal(`${getCloudHost()}login`);
+	await shell.openExternal(`${getCloudHost()}/login`);
 	return new Promise<string>((resolve) => {
 		const server = createServer((req, res) => {
 			const token = req.url?.split("/")[1];

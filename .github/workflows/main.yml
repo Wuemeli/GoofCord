@@ -17,7 +17,7 @@ jobs:
             arch: "--x64 --arm64 --armv7l"
           - name: win
             runner: windows-latest
-            targets: "zip"
+            targets: "zip nsis"
             arch: "--x64 --ia32 --arm64"
           - name: mac
             runner: macos-latest
@@ -40,6 +40,9 @@ jobs:
           node-version: "22.x"
           cache: "pnpm"
 
+      - name: Set virtual store dir max length
+        run: pnpm config set virtual-store-dir-max-length 70
+
       - name: Install Node dependencies
         run: pnpm install --frozen-lockfile
 
@@ -49,7 +52,19 @@ jobs:
       - name: Build GoofCord
         run: pnpm run build
 
+      - name: Load Electron Cache
+        uses: actions/cache/restore@v4
+        with:
+          path: .cache
+          key: electron-zips.stable.${{matrix.os}}
+
       - name: Package GoofCord
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: electron-builder ${{ matrix.arch }} --${{ matrix.name }} ${{ matrix.targets }} --publish=always
+
+      - name: Save Electron Cache
+        uses: actions/cache/save@v4
+        with:
+          path: .cache
+          key: electron-zips.stable.${{matrix.os}}
